@@ -38,6 +38,11 @@ int main() {
         data = char('b');
         // Value getter
         assert(*data.Get<char>() == 'b');
+
+        // Test a visitor
+        data.Visit([](const auto& el){
+            assert(sizeof(el) == sizeof(char));
+        });
     }
 
     return 0;

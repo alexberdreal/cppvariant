@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <functional>
 
 /*
     The following class tries to imitate the functionality of std::variant.
@@ -21,6 +22,9 @@ namespace cppvariant {
 template <typename... Types>
 class Variant {
 private:
+    // Helper function for a visitor
+    template <typename Callable, int CurIdx, typename CurType, typename... NextTypes>
+    void TryVisitNext(Callable&& callable);
 
     // Getter of the biggest size among the available Types
     template <size_t MaxSize, typename CurType, typename... NextTypes>
@@ -59,6 +63,10 @@ public:
     // Getter of a pointer to the underlying value
     template <typename T>
     inline constexpr T* Get();
+
+    // A visitor function, analogue of std::visit
+    template <typename Callable>
+    void Visit(Callable&&);
 
     // User-defined destructor
     inline ~Variant();

@@ -49,6 +49,17 @@ inline constexpr bool Variant<Types...>::HasType() {
 }
 
 template <typename... Types>
+template <typename Callable, int CurIdx, typename CurType, typename... NextTypes>
+void Variant<Types...>::TryVisitNext(Callable&& callable) {
+    if (CurIdx == _idx) {
+        callable(*Get<CurType>());
+    } else if constexpr (sizeof...(NextTypes) > 0) {
+        TryVisitNext<Callable, CurIdx + 1, NextTypes...>(std::forward<Callable>(callable));
+    }
+}
+
+
+template <typename... Types>
 template <int CurIdx, typename Type, typename... NextTypes>
 inline void Variant<Types...>::Destroy() {
     if (CurIdx == _idx) {
@@ -71,6 +82,12 @@ inline constexpr Variant<Types...>& Variant<Types...>::operator=(T&& arg) {
     _idx = GetIndex<0, T, Types...>();
     new (_data.data()) T(std::forward<T>(arg));
     return *this;
+}
+
+template<typename... Types>
+template <typename Callable>
+void Variant<Types...>::Visit(Callable&& callable) {
+    TryVisitNext<Callable, 0, Types...>(std::forward<Callable>(callable));
 }
 
 template<typename... Types>
